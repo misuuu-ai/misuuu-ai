@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Змейка Хасанатор</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="game-ui.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="masthead">
+        <a class="wordmark" href="#game" aria-label="Змейка Хасанатор, к игровому полю">
+          <span class="brand-glyph" aria-hidden="true">S</span>
+          <span class="brand-copy">
+            <span class="eyebrow">АРКАДА / 01</span>
+            <span class="brand-name">ЗМЕЙКА ХАСАНАТОР</span>
+          </span>
+        </a>
+        <div class="session-state" aria-live="polite">
+          <span class="session-dot" aria-hidden="true"></span>
+          <span id="state-label">ГОТОВ К ЗАБЕГУ</span>
+        </div>
+        <button type="button" id="pause-btn" class="pause-btn hidden" aria-label="Пауза" title="Пауза">
+          <span aria-hidden="true">Ⅱ</span>
+        </button>
+      </header>
+
+      <section id="game" class="game-layout" aria-label="Игровая сцена">
+        <aside class="side-rail left-rail" aria-label="Счёт и рекорд">
+          <p class="rail-kicker">ТЕКУЩИЙ ЗАБЕГ</p>
+          <div class="stat-block score-stat">
+            <span class="stat-label">СЧЁТ</span>
+            <p id="score" class="stat-value">0</p>
+            <span class="stat-rule" aria-hidden="true"></span>
+          </div>
+          <div class="stat-block record-stat">
+            <span class="stat-label">ЛУЧШИЙ РЕЗУЛЬТАТ</span>
+            <p id="best" class="stat-value">0</p>
+          </div>
+          <div class="rail-divider"></div>
+          <div class="rail-metric">
+            <span>ДЛИНА</span>
+            <strong id="length-value">03</strong>
+          </div>
+          <div class="rail-metric">
+            <span>ПОПАДАНИЯ</span>
+            <strong id="hits-value">00</strong>
+          </div>
+          <p class="rail-note">ЕШЬ ЯБЛОКИ.<br />НЕ ЕШЬ СЕБЯ.</p>
+        </aside>
+
+        <section class="game-center" aria-label="Игровое поле и управление">
+          <div class="board-caption">
+            <span>ПОЛЕ <b>20 × 20</b></span>
+            <span class="live-caption"><span></span> LIVE SESSION</span>
+          </div>
+          <div class="board-wrap">
+            <canvas id="board" width="480" height="480" aria-label="Игровое поле" tabindex="0"></canvas>
+            <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-title" aria-describedby="overlay-text">
+              <span class="overlay-eyebrow">ARCADE / NO. 01</span>
+              <p id="overlay-title">ЗМЕЙКА ХАСАНАТОР</p>
+              <p id="overlay-text"></p>
+              <div id="overlay-stats" class="overlay-stats"></div>
+              <div id="cameo-gallery" class="cameo-gallery"></div>
+              <div id="menu-actions" class="menu-actions"></div>
+              <p class="overlay-footnote">СТРЕЛКИ / WASD <span>·</span> ESC — ПАУЗА</p>
+            </div>
+            <div id="float-layer" class="float-layer" aria-hidden="true"></div>
+            <p id="combat-indicator" class="combat-indicator hidden" aria-live="polite">
+              <span aria-hidden="true">⌖</span> БОЕВОЙ РЕЖИМ
+            </p>
+          </div>
+          <div class="board-baseline">
+            <span>НЕ СТОЛКНИСЬ</span>
+            <span>01 / 01</span>
+          </div>
+        </section>
+
+        <aside class="side-rail right-rail" aria-label="Параметры и управление">
+          <p class="rail-kicker">СЕССИЯ</p>
+          <div class="session-clock">
+            <span class="stat-label">ВРЕМЯ В ИГРЕ</span>
+            <strong id="run-time">00:00</strong>
+          </div>
+          <div class="mode-readout">
+            <span class="mode-mark" aria-hidden="true">✳</span>
+            <div>
+              <span class="stat-label">РЕЖИМ</span>
+              <strong id="mode-value">КЛАССИЧЕСКИЙ</strong>
+            </div>
+          </div>
+          <div class="rail-divider"></div>
+          <p class="rail-kicker">УПРАВЛЕНИЕ</p>
+          <div class="key-guide"><span>ДВИЖЕНИЕ</span><kbd>W A S D</kbd></div>
+          <div class="key-guide"><span>УСКОРЕНИЕ</span><kbd>CTRL</kbd></div>
+          <div class="key-guide"><span>БОЕВОЙ РЕЖИМ</span><kbd>Z</kbd></div>
+          <div class="key-guide"><span>ПАУЗА</span><kbd>ESC</kbd></div>
+        </aside>
+      </section>
+
+      <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+      <div id="pad" class="pad" aria-hidden="true">
+        <button type="button" data-dir="up">↑</button>
+        <div class="pad-mid">
+          <button type="button" data-dir="left">←</button>
+          <button type="button" data-dir="down">↓</button>
+          <button type="button" data-dir="right">→</button>
+        </div>
+      </div>
+      <div id="mobile-control-root" class="mobile-control-root" aria-hidden="true" data-scheme="stick">
+        <div id="virtual-stick-zone" class="virtual-stick-zone" aria-label="Виртуальный джойстик">
+          <div class="virtual-stick-base" aria-hidden="true">
+            <span class="virtual-stick-knob"></span>
+          </div>
+        </div>
+        <div class="mobile-actions" aria-label="Действия">
+          <button type="button" id="combat-btn" class="combat-btn mobile-action-button" aria-label="Боевой режим" aria-pressed="false" title="Боевой режим">
+            <span aria-hidden="true">⌖</span>
+          </button>
+          <button type="button" id="boost-btn" class="boost-btn mobile-action-button" aria-label="Ускорение" aria-pressed="false" title="Удерживайте для ускорения">
+            <span aria-hidden="true">↯</span>
+          </button>
+        </div>
+      </div>
+      <footer class="page-footer">
+        <span>ЗМЕЙКА ХАСАНАТОР <b>v1.0</b></span>
+        <span>ОДИН ЗАБЕГ. ЕЩЁ ОДИН.</span>
+      </footer>
+    </main>
+    <div id="cameo-root" class="cameo-root" aria-hidden="true">
+      <div id="cameo-window-left" class="cameo-window cameo-window-left">
+        <div id="cameo-card-left" class="cameo-card from-left">
+          <img id="cameo-image" alt="" />
+        </div>
+      </div>
+      <div id="cameo-window-right" class="cameo-window cameo-window-right">
+        <div id="cameo-card-right" class="cameo-card from-right">
+          <img class="cameo-image-mirror" alt="" />
+        </div>
+      </div>
+    </div>
+    <input id="cameo-upload" class="file-input" type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true" />
+    <script src="audio-manager.js"></script>
+    <script src="cameo-manager.js"></script>
+    <script src="snake-skins.js"></script>
+    <script src="field-themes.js"></script>
+    <script src="ui-manager.js"></script>
+    <script src="customization-ui.js"></script>
+    <script src="mobile-controls.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>
